@@ -143,3 +143,16 @@ def create_chrome_instance():
     s = Service('your_path/chromedriver.exe')
 
     return webdriver.Chrome(service=s, options=options)
+
+if __name__ == "__main__":
+    # Создаётся экземпляр браузера
+    driver = create_chrome_instance()
+
+    # Добавление time_zone для браузера в формате America/New_York
+    time_zone = 'America/New_York'
+    tz_params = {'timezoneId': f'{time_zone}'}
+    driver.execute_cdp_cmd('Emulation.setTimezoneOverride', tz_params)
+    #если используешь IPv6 2ip.ru i whoer.net не откроются пожтому выбор пал на яндекс
+    driver.get('https://yandex.ru/Internet')
+    input('Проверь на сайте настройки браузера и нажми Enter для завершения скрипта')
+
