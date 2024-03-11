@@ -1,15 +1,9 @@
 from selenium import webdriver
-from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
-import login_data as dfcb
-import pickle
-import time
-import random
 import os
 import shutil
 import tempfile
-from datetime import datetime
+
 
 class ProxyExtension:
     '''Авторизация прокси для Undetected_chromedriver. По сути это расширение для chrome.
@@ -86,25 +80,49 @@ class ProxyExtension:
         shutil.rmtree(self._dir)
 
 
-
 def create_chrome_instance():
     '''Создание экземпляра браузера Googlechrome'''
     options = webdriver.ChromeOptions()
-    proxy = (dfcb.proxy_ip, dfcb.proxy_port, dfcb.login_proxy, dfcb.password_proxy)
+
+    # Использование прокси через class ProxyExtension, читай докеумент к классу
+    proxy = ("proxy_ip", "proxy_port", "login_proxy", "password_proxy")
     proxy_extension = ProxyExtension(*proxy)
     options.add_argument(f"--load-extension={proxy_extension.directory}")
-    options.add_argument(f"--proxy-server={dfcb.proxy_ip}:{dfcb.proxy_port}")
-    options.add_argument(f"--proxy-auth={dfcb.login_proxy}:{dfcb.password_proxy}")
+
+    # альтернативный способ использования прокси
+    #options.add_argument(f"--proxy-server={'proxy_ip'}:{'proxy_port'}")
+
+    # Отключает использование среды безопасности (sandbox) в браузере Chrome.
     options.add_argument("--no-sandbox")
-    options.add_argument(f"--lang={dfcb.language}")
+
+    # Введи язык которой будет использоваться в браузере
+    b_lang = 'your_language'
+    options.add_argument(f"--lang={b_lang}")
+
+    # Отключаем использование графического процессора
     options.add_argument("--disable-gpu")
+
+    # Отключаем автоматический перевод страниц
     options.add_argument("--disable-translate")
+
+    # Отключаем политику Same-Origin Policy
     options.add_argument("--disable-web-security")
+
+    # Отключаем использование /dev/shm
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument(f'user-agent={dfcb.user_agent}')
+
+    # Устанавливаем пользовательский агент (User-Agent)
+    user_agent = "ваш_пользовательский_агент"
+    options.add_argument(f"user-agent={user_agent}")
+
+    # Отключаем алгоритм плавности для WebRTC
     options.add_argument("--disable-rtc-smoothness-algorithm")
+
+    # Отключаем определенные функции движка браузера Blink, связанные с автоматизацией
     options.add_argument("--disable-blink-features=AutomationControlled")
 
+    # Блок кода для использования профилей GoogleChrome, нужно быть аккуратным. Сильно влияет на другие настройки браузера.
+    # Всегда проверяй как настроен на whoer.net или pixelscan.net
     #options.add_argument('--remote-debugging-port=9222')
     #options.add_argument('--allow-profiles-outside-user-dir')
     #options.add_argument('--enable-profile-shortcut-manager')
@@ -113,8 +131,15 @@ def create_chrome_instance():
 
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option("useAutomationExtension", False)
-    options.add_extension("WebRTC Control 0.3.2.0.crx")
-    options.add_extension("Location Guard 2.5.0.0.crx")
 
-    s = Service('chromedriver.exe')
+    # Расширения в формате .crx класть в папку и прописывать путь
+    # Расширение отключает webrtc для предотвращения утечки ip
+    options.add_extension("your_path/WebRTC Control 0.3.2.0.crx")
+
+    # Расширение позволяет выбрать геолокацию для браузера
+    options.add_extension("your_path/Location Guard 2.5.0.0.crx")
+
+    #Добавляем CHOROMEDRIVER кладём в папку актуальную версию и указываем путь
+    s = Service('your_path/chromedriver.exe')
+
     return webdriver.Chrome(service=s, options=options)
